@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int                  @unique @default(autoincrement())
+  email              String
+  password           String
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  totalDiamond       Int                  @default(0)
+  totalTicket        Int                  @default(0)
+  MatchRoomPlayer1   MatchRoom[]          @relation(name: "MatchRoomPlayer1")
+  MatchRoomPlayer2   MatchRoom[]          @relation(name: "MatchRoomPlayer2")
+  MatchRoomWinner    MatchRoom[]          @relation(name: "MatchRoomWinner")
+  TransactionHistory TransactionHistory[]
+}
+
+model MatchRoom {
+  id              Int       @unique @default(autoincrement())
+  player1Id       Int
+  isPlayer1Ready  Boolean   @default(false)
+  isPlayer1Finish Boolean   @default(false)
+  Player1         User      @relation(name: "MatchRoomPlayer1", references: [id], fields: [player1Id])
+  player2Id       Int?
+  isPlayer2Ready  Boolean   @default(false)
+  isPlayer2Finish Boolean   @default(false)
+  Player2         User?     @relation(name: "MatchRoomPlayer2", references: [id], fields: [player2Id])
+  typeOfGame      String
+  player1Offer    Int?
+  player2Offer    Int?
+  winnerId        Int?
+  Winner          User?     @relation(name: "MatchRoomWinner", references: [id], fields: [winnerId])
+  gamesChessComId Int?
+  GamesChessCom   ChessCom? @relation(references: [id], fields: [gamesChessComId])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model ChessCom {
+  id                      Int         @unique @default(autoincrement())
+  player1Username         String?
+  player1GameHistoryUri   String?
+  player1RelatedGameIndex Int?
+  player2Username         String?
+  player2GameHistoryUri   String?
+  player2RelatedGameIndex Int?
+  durationOfPlay          Int?
+  detailMatch             Json?
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+  MatchRoom               MatchRoom[]
+}
+
+model TransactionHistory {
+  id                     Int       @unique @default(autoincrement())
+  userId                 Int
+  User                   User      @relation(references: [id], fields: [userId])
+  itemVaultId            Int
+  ItemVault              ItemVault @relation(references: [id], fields: [itemVaultId])
+  detailItem             String?
+  transactionTime        String?
+  transactionStatus      String?
+  transactionId          String?
+  three_dsVersion        String?
+  statusMessage          String?
+  statusCode             String?
+  signatureKey           String?
+  settlementTime         String?
+  paymentType            String?
+  orderId                String    @unique
+  metadata               Json?
+  merchantId             String?
+  maskedCard             String?
+  grossAmount            String?
+  fraudStatus            String?
+  expiryTime             String?
+  eci                    String?
+  currency               String?
+  channelResponseMessage String?
+  channelResponseCode    String?
+  cardType               String?
+  bank                   String?
+  approvalCode           String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+}
+
+model ItemVault {
+  id                 Int                  @unique @default(autoincrement())
+  name               String
+  numberOfItem       Int
+  price              Float
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  TransactionHistory TransactionHistory[]
+}
